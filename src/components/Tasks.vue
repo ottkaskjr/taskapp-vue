@@ -1,5 +1,16 @@
 <template>
   <div class="container">
+    <div id="notifyParent">
+      <div
+        v-for="(notification, index) in notifications"
+        class="notification p-3 mb-1"
+      >
+        <p class="">{{ notification }}</p>
+        <b-button v-on:click="dismiss(index)" variant="success" class="btn-sm"
+          >Close</b-button
+        >
+      </div>
+    </div>
     <div class="mt-3 mb-4">
       <b-button v-b-modal.taskModal variant="success" class="btn btn-lg"
         >Create task</b-button
@@ -60,7 +71,7 @@
         <div class="col-12 col-md-2 text-center">
           <button
             :id="task.id"
-            v-on:click="resolveTask(task.id)"
+            v-on:click="resolveTask(task.id, task.task)"
             v-bind:class="{ 'btn-warning': isDue(task.deadline) }"
             class="btn btn-success"
           >
@@ -86,9 +97,13 @@ export default {
       tasks: [],
       error: '',
       connection: null,
+      notifications: ['message'],
     };
   },
   methods: {
+    dismiss: function(index) {
+      this.notifications.splice(index, 1);
+    },
     validateForm: function() {
       this.validated = true;
       if (this.newTask.task.length < 1) {
@@ -110,18 +125,16 @@ export default {
       let deadline = new Date(year, month, day, hour, minutes);
       this.newTask.deadline = deadline.getTime();
       let errorTest = { a: 135 };
+      let taskName = this.newTask.task;
       this.$http
-        .post(this.$host + '/', this.newTask)
+        .post(this.$host + 'task/', this.newTask)
         .then((data) => {
           this.newTask = { task: '' };
           this.date = '';
           this.time = '';
           this.validated = false;
           this.$bvModal.hide('taskModal');
-
-          //this.tasks.push(data.data);
-          //this.sortTasks();
-          this.sendMessage('update');
+          this.sendMessage(taskName + ' created');
         })
         .catch((e) => {
           this.$bvModal.hide('taskModal');
@@ -136,7 +149,7 @@ export default {
     },
     getTasks: function() {
       this.$http
-        .get(this.$host + '/')
+        .get(this.$host + 'task/')
         .then((data) => {
           this.tasks = data.data.sort((task1, task2) => {
             return task1.deadline - task2.deadline;
@@ -174,18 +187,11 @@ export default {
       }
       return false;
     },
-    resolveTask: function(id) {
+    resolveTask: function(id, task) {
       this.$http
-        .delete(this.$host + '/' + id)
+        .delete(this.$host + 'task/' + id)
         .then((data) => {
-          /*
-          for (let i = this.tasks.length - 1; i >= 0; i--) {
-            if (this.tasks[i].id === id) {
-              this.tasks.splice(i, 1);
-              break;
-            }
-          }*/
-          this.sendMessage('update');
+          this.sendMessage(task + ' is resolved');
         })
         .catch((e) => {
           this.error = e.message;
@@ -202,15 +208,14 @@ export default {
     /* OPEN CONNECTION */
     this.connection = new WebSocket('ws://localhost:8080/update/1');
     this.connection.onopen = function(event) {
-      console.log(event);
-      console.log('Successfully connected to the echo WebSocket Server');
+      //console.log(event);
+      //console.log('Successfully connected to the echo WebSocket Server');
     };
 
     this.connection.onmessage = (event) => {
-      console.log(event);
-      if (event.data === 'update') {
-        this.getTasks();
-      }
+      //console.log(event);
+      this.notifications.push(event.data);
+      this.getTasks();
     };
   },
 };
@@ -230,5 +235,19 @@ export default {
 .shadowSm {
   -webkit-box-shadow: 0px 0px 13px -1px #000000;
   box-shadow: 0px 0px 13px -1px #000000;
+}
+#notifyParent {
+  position: absolute;
+  z-index: 1;
+  top: 5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+}
+.notification {
+  position: relative;
+  width: inherit;
+  background-color: #c4ecff;
+  border-radius: 5px;
 }
 </style>

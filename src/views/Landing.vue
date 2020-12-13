@@ -1,7 +1,6 @@
 <template>
   <div>
     <Brand />
-    <AddTask />
     <Tasks />
   </div>
 </template>
@@ -10,14 +9,12 @@
 // @ is an alias to /src
 import Brand from '@/components/Brand.vue';
 import Tasks from '@/components/Tasks.vue';
-import AddTask from '@/components/AddTask.vue';
 
 export default {
   name: 'Landing',
   components: {
     Brand,
     Tasks,
-    AddTask,
   },
 };
 </script>

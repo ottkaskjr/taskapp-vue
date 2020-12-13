@@ -14,7 +14,7 @@ Vue.use(VueAxios, axios)
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
-Vue.prototype.$host = "http://localhost:8080"
+Vue.prototype.$host = "http://localhost:8080/" //http://localhost:8080/
 
 
 new Vue({
