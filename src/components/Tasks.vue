@@ -97,7 +97,7 @@ export default {
       tasks: [],
       error: '',
       connection: null,
-      notifications: ['message'],
+      notifications: [],
     };
   },
   methods: {
